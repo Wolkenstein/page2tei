@@ -12,14 +12,14 @@
   xmlns:xstring = "https://github.com/dariok/XStringUtils"
   exclude-result-prefixes="#all"
   version="3.0">
-  
+
   <xsl:output indent="0" />
-  
+
   <xd:doc>
     <xd:desc>Whether to create `rs type="..."` for person/place/org (default) or `persName` etc. (false())</xd:desc>
   </xd:doc>
   <xsl:param name="rs" select="true()" />
-  
+
   <xd:doc scope="stylesheet">
     <xd:desc>
       <xd:p><xd:b>Author:</xd:b> Dario Kampkaspar, dario.kampkaspar@oeaw.ac.at</xd:p>
@@ -40,12 +40,12 @@
       <xd:p>Use tei:ab as fallback instead of tei:p</xd:p>
     </xd:desc>
   </xd:doc>
-  
+
   <!-- use extended string functions from https://github.com/dariok/XStringUtils -->
   <xsl:include href="string-pack.xsl"/>
-  
+
   <xsl:param name="debug" select="false()" />
-  
+
   <xd:doc>
     <xd:desc>Entry point: start at the top of METS.xml</xd:desc>
   </xd:doc>
@@ -91,7 +91,7 @@
       </text>
     </TEI>
   </xsl:template>
-  
+
   <!-- Templates for trpMetaData -->
   <xd:doc>
     <xd:desc>
@@ -106,7 +106,7 @@
       <xsl:apply-templates />
     </title>
   </xsl:template>
-  
+
   <xd:doc>
     <xd:desc>The author as stated in Transkribus meta data.
       Will be used in the teiHeader as titleStmt/author</xd:desc>
@@ -116,7 +116,7 @@
       <xsl:apply-templates />
     </author>
   </xsl:template>
-  
+
   <xd:doc>
     <xd:desc>The uploader of the current document.
       Will be used as titleStmt/principal</xd:desc>
@@ -124,7 +124,7 @@
   <xsl:template match="uploader">
     <principal><xsl:apply-templates /></principal>
   </xsl:template>
-  
+
   <xd:doc>
     <xd:desc>The description as given in Transkribus meta data.
       Will be used in sourceDesc</xd:desc>
@@ -132,7 +132,7 @@
   <xsl:template match="desc">
     <p><xsl:apply-templates /></p>
   </xsl:template>
-  
+
   <xd:doc>
     <xd:desc>The name of the collection from which this document was exported.
       Will be used as seriesStmt/title</xd:desc>
@@ -140,7 +140,7 @@
   <xsl:template match="colName">
     <title><xsl:apply-templates /></title>
   </xsl:template>
-  
+
   <!-- Templates for METS -->
   <xd:doc>
     <xd:desc>Create tei:facsimile with @xml:id</xd:desc>
@@ -148,25 +148,25 @@
   <xsl:template match="mets:file" mode="facsimile">
     <xsl:variable name="file" select="document(mets:FLocat/@xlink:href, /)"/>
     <xsl:variable name="numCurr" select="@SEQ"/>
-    
+
     <xsl:apply-templates select="$file//p:Page" mode="facsimile">
       <xsl:with-param name="imageName" select="substring-after(mets:FLocat/@xlink:href, '/')" />
       <xsl:with-param name="numCurr" select="$numCurr" tunnel="true" />
     </xsl:apply-templates>
   </xsl:template>
-  
+
   <xd:doc>
     <xd:desc>Apply by-page</xd:desc>
   </xd:doc>
   <xsl:template match="mets:file" mode="text">
     <xsl:variable name="file" select="document(mets:FLocat/@xlink:href, .)"/>
     <xsl:variable name="numCurr" select="@SEQ"/>
-    
+
     <xsl:apply-templates select="$file//p:Page" mode="text">
       <xsl:with-param name="numCurr" select="$numCurr" tunnel="true" />
     </xsl:apply-templates>
   </xsl:template>
-  
+
   <!-- Templates for PAGE, facsimile -->
   <xd:doc>
     <xd:desc>
@@ -182,10 +182,10 @@
   <xsl:template match="p:Page" mode="facsimile">
     <xsl:param name="imageName" />
     <xsl:param name="numCurr" tunnel="true" />
-    
+
     <xsl:variable name="coords" select="tokenize(p:PrintSpace/p:Coords/@points, ' ')" />
     <xsl:variable name="type" select="substring-after(@imageFilename, '.')" />
-    
+
     <!-- NOTE: up to now, lry and lry were mixed up. This is fiex here. -->
     <surface ulx="0" uly="0"
       lrx="{@imageWidth}" lry="{@imageHeight}"
@@ -194,14 +194,14 @@
       <xsl:apply-templates select="p:PrintSpace | p:TextRegion | p:SeparatorRegion | p:GraphicRegion | p:TableRegion" mode="facsimile"/>
     </surface>
   </xsl:template>
-  
+
   <xd:doc>
     <xd:desc>create the zones within facsimile/surface</xd:desc>
     <xd:param name="numCurr">Numerus currens of the current page</xd:param>
   </xd:doc>
   <xsl:template match="p:PrintSpace | p:TextRegion | p:SeparatorRegion | p:GraphicRegion | p:TextLine" mode="facsimile">
     <xsl:param name="numCurr" tunnel="true" />
-    
+
     <xsl:variable name="renditionValue">
       <xsl:choose>
         <xsl:when test="local-name(parent::*) = 'TableCell'">TableCell</xsl:when>
@@ -219,7 +219,7 @@
         </xsl:for-each-group>
       </xsl:map>
     </xsl:variable>
-    
+
     <xsl:if test="$renditionValue = ('Line', 'TableCell')">
       <xsl:text>
         </xsl:text>
@@ -241,20 +241,20 @@
       </xsl:if>
     </zone>
   </xsl:template>
-  
+
   <xd:doc>
     <xd:desc>Create the zone for a table</xd:desc>
     <xd:param name="numCurr">Numerus currens of the current page</xd:param>
   </xd:doc>
   <xsl:template match="p:TableRegion" mode="facsimile">
     <xsl:param name="numCurr" tunnel="true" />
-    
+
     <zone points="{p:Coords/@points}" rendition="Table">
       <xsl:attribute name="xml:id"><xsl:value-of select="'facs_'||$numCurr||'_'||@id"/></xsl:attribute>
       <xsl:apply-templates select="p:TableCell//p:TextLine" mode="facsimile" />
     </zone>
   </xsl:template>
-  
+
   <xd:doc>
     <xd:desc>create the page content</xd:desc>
     <xd:param name="numCurr">Numerus currens of the current page</xd:param>
@@ -265,22 +265,22 @@
     <pb facs="#facs_{$numCurr}" n="{$numCurr}" xml:id="img_{format-number($numCurr, '0000')}"/>
     <xsl:apply-templates select="p:TextRegion | p:SeparatorRegion | p:GraphicRegion | p:TableRegion" mode="text" />
   </xsl:template>
-  
+
   <xd:doc>
    <xd:desc>
     <xd:p>create specific elements based on the @typing of the text region</xd:p>
     <xd:p>PAGE labels for text region see: https://www.primaresearch.org/tools/PAGELibraries
-     caption observed 
-     header observed 
-     footer observed 
-     page-number observed 
+     caption observed
+     header observed
+     footer observed
+     page-number observed
      drop-capital ignored
      credit ignored
      floating ignored
-     signature-mark observed 
-     catch-word observed 
-     marginalia observed 
-     footnote observed 
+     signature-mark observed
+     catch-word observed
+     marginalia observed
+     footnote observed
      footnote-continued observed
      endnote ignored
      TOC-entry ignored
@@ -294,7 +294,7 @@
     <xsl:variable name="custom" as="map(*)">
       <xsl:apply-templates select="@custom" />
     </xsl:variable>
-    
+
     <xsl:choose>
       <xsl:when test="@type = 'heading'">
         <head facs="#facs_{$numCurr}_{@id}">
@@ -342,7 +342,7 @@
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
-  
+
   <xd:doc>
     <xd:desc>create a table</xd:desc>
     <xd:param name="numCurr"/>
@@ -362,7 +362,7 @@
       </xsl:for-each-group>
     </table>
   </xsl:template>
-  
+
   <xd:doc>
     <xd:desc>create table cells</xd:desc>
     <xd:param name="numCurr"/>
@@ -402,7 +402,7 @@
       </xsl:when>
     </xsl:choose>
   </xsl:template>
-  
+
   <xd:doc>
     <xd:desc>
       Combine taggings marked with “continued” – cf. https://github.com/dariok/page2tei/issues/10
@@ -442,14 +442,14 @@
       </xsl:choose>
     </xsl:for-each>
   </xsl:template>
-  
+
   <xd:doc>
     <xd:desc>Converts one line of PAGE to one line of TEI</xd:desc>
     <xd:param name="numCurr">Numerus currens, to be tunneled through from the page level</xd:param>
   </xd:doc>
   <xsl:template match="p:TextLine">
     <xsl:param name="numCurr" tunnel="true" />
-    
+
     <xsl:variable name="text" select="p:TextEquiv/p:Unicode"/>
     <xsl:variable name="custom" as="text()*">
       <xsl:for-each select="tokenize(@custom, '}')">
@@ -515,7 +515,7 @@
             <xsl:variable name="id" select="@type" />
             <xsl:variable name="precs"
               select="preceding-sibling::local:m[@pos = 's' and preceding-sibling::local:m[@o = $o]]" />
-            
+
             <xsl:for-each select="$precs">
               <xsl:variable name="so" select="@o"/>
               <xsl:variable name="myP" select="count(following-sibling::local:m[@pos='e' and @o=$so]/preceding-sibling::node())"/>
@@ -540,9 +540,9 @@
         </xsl:choose>
       </xsl:for-each>
     </xsl:variable>
-    
+
     <xsl:variable name="pos" select="xs:integer(substring-before(substring-after(@custom, 'index:'), ';')) + 1" />
-    
+
     <!-- TODO parameter to create <l>...</l> - #1 -->
     <xsl:text>
       </xsl:text>
@@ -552,7 +552,7 @@
       [count(preceding-sibling::local:m[@pos='s']) = count(preceding-sibling::local:m[@pos='e'])]" />
       <!--[not(preceding-sibling::local:m[1][@pos='s'])]" />-->
   </xsl:template>
-  
+
   <xd:doc>
     <xd:desc>Starting milestones for (possibly nested) elements</xd:desc>
   </xd:doc>
@@ -568,14 +568,14 @@
         </xsl:if>
       </xsl:map>
     </xsl:variable>
-    
+
     <xsl:variable name="elem">
       <local:t>
         <xsl:sequence select="following-sibling::node()
           intersect following-sibling::local:m[@o=$o]/preceding-sibling::node()" />
       </local:t>
     </xsl:variable>
-    
+
     <xsl:choose>
       <xsl:when test="@type = 'textStyle'">
         <hi rend="{xstring:substring-before-if-ends(substring-after(substring-after(@o, 'length'), ';'), '}')}">
@@ -622,7 +622,7 @@
           </xsl:if>-->
           <xsl:for-each select="map:keys($custom)">
             <xsl:if test=". != 'length' and . != ''">
-              <xsl:attribute name="{.}" select="map:get($custom, .)" /> 
+              <xsl:attribute name="{.}" select="map:get($custom, .)" />
             </xsl:if>
           </xsl:for-each>
           <xsl:call-template name="elem">
@@ -642,7 +642,7 @@
           <xsl:if test="$custom('continued')">
             <xsl:attribute name="continued" select="true()" />
           </xsl:if>
-          
+
           <xsl:call-template name="elem">
             <xsl:with-param name="elem" select="$elem" />
           </xsl:call-template>
@@ -657,7 +657,7 @@
           <xsl:if test="$custom('placeName') != ''">
             <xsl:attribute name="key" select="replace($custom('placeName'), '\\u0020', ' ')" />
           </xsl:if>
-          
+
           <xsl:call-template name="elem">
             <xsl:with-param name="elem" select="$elem" />
           </xsl:call-template>
@@ -674,6 +674,32 @@
           </xsl:call-template>
         </xsl:element>
       </xsl:when>
+      <!-- Additional Types PH -->
+      <xsl:when test="@type = 'Rubrizierung'">
+        <hi rend='rubrication'>
+          <xsl:call-template name="elem">
+            <xsl:with-param name="elem" select="$elem" />
+          </xsl:call-template>
+        </hi>
+      </xsl:when>
+      <xsl:when test="@type = 'Initiale'">
+        <hi rend='initial'>
+          <xsl:call-template name="elem">
+            <xsl:with-param name="elem" select="$elem" />
+          </xsl:call-template>
+        </hi>
+      </xsl:when>
+      <xsl:when test="@type = 'lemma'">
+        <xsl:element name="w">
+          <xsl:if test="$custom('fwb') != '' or $custom('wbnetz') != ''">
+            <xsl:attribute name="lemmaRef" select="replace($custom('fwb'), '\\u0020', ' ') || ', ' || replace($custom('wbnetz'), '\\u0020', ' ')" />
+          </xsl:if>
+          <xsl:call-template name="elem">
+            <xsl:with-param name="elem" select="$elem" />
+          </xsl:call-template>
+        </xsl:element>
+      </xsl:when>
+
       <xsl:otherwise>
         <xsl:element name="{@type}">
           <xsl:call-template name="elem">
@@ -682,17 +708,17 @@
         </xsl:element>
       </xsl:otherwise>
     </xsl:choose>
-    
+
     <xsl:apply-templates select="following-sibling::local:m[@pos='e' and @o=$o]/following-sibling::node()[1][self::text()]" />
   </xsl:template>
-  
+
   <xd:doc>
     <xd:desc>Process what's between a pair of local:m</xd:desc>
     <xd:param name="elem"/>
   </xd:doc>
   <xsl:template name="elem">
     <xsl:param name="elem" />
-    
+
     <xsl:choose>
       <xsl:when test="$elem//local:m">
         <xsl:apply-templates select="$elem/local:t/text()[not(preceding-sibling::local:m)]" />
@@ -704,12 +730,12 @@
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
-  
+
   <xd:doc>
     <xd:desc>Leave out possibly unwanted parts</xd:desc>
   </xd:doc>
   <xsl:template match="p:Metadata" mode="text" />
-  
+
   <xd:doc>
     <xd:desc>Parse the content of an attribute such as @custom into a map.</xd:desc>
   </xd:doc>
@@ -726,7 +752,7 @@
       </xsl:for-each>
     </xsl:map>
   </xsl:template>
-  
+
   <xd:doc>
     <xd:desc>Text nodes to be copied</xd:desc>
   </xd:doc>
