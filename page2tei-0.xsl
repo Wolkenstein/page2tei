@@ -336,7 +336,7 @@
       </xsl:when>
       <!-- the fallback option should be a semantically open element such as <ab> -->
       <xsl:otherwise>
-        <ab facs="#facs_{$numCurr}_{@id}" type="{@type}{$custom?structure?type}">
+        <ab facs="#facs_{$numCurr}_{@id}">
           <xsl:apply-templates select="p:TextLine" />
         </ab>
       </xsl:otherwise>
@@ -698,6 +698,11 @@
             <xsl:with-param name="elem" select="$elem" />
           </xsl:call-template>
         </xsl:element>
+      </xsl:when>
+      <xsl:when test="@type = 'comment'">
+        <xsl:call-template name="elem">
+          <xsl:with-param name="elem" select="$elem" />
+        </xsl:call-template>
       </xsl:when>
 
       <xsl:otherwise>
