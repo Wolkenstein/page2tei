@@ -439,6 +439,7 @@
       https://github.com/dariok/page2tei/issues/10 Thanks to @thodel for reporting. </xd:desc>
     <xd:param name="context"/>
   </xd:doc>
+  <!-- Still not working. PH -->
   <xsl:template name="continuation">
     <xsl:param name="context"/>
     <xsl:for-each select="$context/node()">
@@ -597,7 +598,14 @@
     <!-- TODO parameter to create <l>...</l> - #1 -->
     <xsl:text>
       </xsl:text>
-    <lb facs="#facs_{$numCurr}_{@id}" n="N{format-number($pos, '000')}"/>
+    <xsl:element name="lb">
+      <xsl:attribute name="facs" select="concat('#facs_', string($numCurr), '_', string(./@id))"/>
+      <xsl:attribute name="n" select="concat('N', format-number($pos, '000'))"/>
+      <!-- add @break='no' if contains(./preceding::p:TextLine[1],'¬') -->
+      <xsl:if test="contains(./preceding::p:TextLine[1],'¬')">
+        <xsl:attribute name="break" select="string('no')"/>
+      </xsl:if>
+    </xsl:element>
     <xsl:apply-templates select="$prepared/text()[not(preceding-sibling::local:m)]"/>
     <xsl:apply-templates
       select="
@@ -870,9 +878,16 @@
   </xsl:template>
 
   <xsl:template match="node() | @*" mode="transformation2">
-    <xsl:copy>
-      <xsl:apply-templates select="node() | @*" mode="transformation2"/>
-    </xsl:copy>
+    <xsl:choose>
+      <!-- Ignore Elements between two continued elements  -->
+      <xsl:when test=".[./preceding-sibling::*[1][@continued = 'true']][./following-sibling::*[1][@continued = 'true']]"/>
+      <xsl:otherwise>
+        <xsl:copy>
+          <xsl:apply-templates select="node() | @*" mode="transformation2"/>
+        </xsl:copy>
+      </xsl:otherwise>
+    </xsl:choose>
+    
   </xsl:template>
 
   <!-- Merge continued elements -->
@@ -893,7 +908,8 @@
         <xsl:copy-of select="$part2/node()"/>
       </xsl:element>
     </xsl:if>
-
   </xsl:template>
+  
+  
 
 </xsl:stylesheet>
