@@ -602,7 +602,7 @@
       <xsl:attribute name="facs" select="concat('#facs_', string($numCurr), '_', string(./@id))"/>
       <xsl:attribute name="n" select="concat('N', format-number($pos, '000'))"/>
       <!-- add @break='no' if contains(./preceding::p:TextLine[1],'¬') -->
-      <xsl:if test="contains(./preceding::p:TextLine[1],'¬')">
+      <xsl:if test="contains(./preceding::p:TextLine[1], '¬')">
         <xsl:attribute name="break" select="string('no')"/>
       </xsl:if>
     </xsl:element>
@@ -778,6 +778,27 @@
           </xsl:call-template>
         </hi>
       </xsl:when>
+      <xsl:when test="@type = 'Rubrikation'">
+        <hi rend="rubrication">
+          <xsl:call-template name="elem">
+            <xsl:with-param name="elem" select="$elem"/>
+          </xsl:call-template>
+        </hi>
+      </xsl:when>
+      <xsl:when test="@type = 'mark'">
+        <hi rend="rubrication">
+          <xsl:call-template name="elem">
+            <xsl:with-param name="elem" select="$elem"/>
+          </xsl:call-template>
+        </hi>
+      </xsl:when>
+      <xsl:when test="@type = 'delete'">
+        <del>
+          <xsl:call-template name="elem">
+            <xsl:with-param name="elem" select="$elem"/>
+          </xsl:call-template>
+        </del>
+      </xsl:when>
       <xsl:when test="@type = 'Initiale'">
         <hi rend="initial">
           <xsl:call-template name="elem">
@@ -804,6 +825,34 @@
         <xsl:call-template name="elem">
           <xsl:with-param name="elem" select="$elem"/>
         </xsl:call-template>
+      </xsl:when>
+      <xsl:when test="@type = 'Problemwort'">
+        <xsl:element name="unclear">
+          <xsl:call-template name="elem">
+            <xsl:with-param name="elem" select="$elem"/>
+          </xsl:call-template>
+        </xsl:element>
+      </xsl:when>
+      <xsl:when test="@type = 'speech'">
+        <xsl:call-template name="elem">
+          <xsl:with-param name="elem" select="$elem"/>
+        </xsl:call-template>
+      </xsl:when>
+      <xsl:when test="@type = 'Korrekturvorschlag'">
+        <xsl:apply-templates select="unclear"/>
+      </xsl:when>
+      <xsl:when test="@type = 'et'">
+        <xsl:call-template name="elem">
+          <xsl:with-param name="elem" select="$elem"/>
+        </xsl:call-template>
+      </xsl:when>
+      <xsl:when test="@type = 'picture_description'">
+        <xsl:element name="span">
+          <xsl:attribute name="type">picture_description</xsl:attribute>
+          <xsl:call-template name="elem">
+            <xsl:with-param name="elem" select="$elem"/>
+          </xsl:call-template>
+        </xsl:element>
       </xsl:when>
 
       <xsl:otherwise>
@@ -880,14 +929,15 @@
   <xsl:template match="node() | @*" mode="transformation2">
     <xsl:choose>
       <!-- Ignore Elements between two continued elements  -->
-      <xsl:when test=".[./preceding-sibling::*[1][@continued = 'true']][./following-sibling::*[1][@continued = 'true']]"/>
+      <xsl:when
+        test=".[./preceding-sibling::*[1][@continued = 'true']][./following-sibling::*[1][@continued = 'true']]"/>
       <xsl:otherwise>
         <xsl:copy>
           <xsl:apply-templates select="node() | @*" mode="transformation2"/>
         </xsl:copy>
       </xsl:otherwise>
     </xsl:choose>
-    
+
   </xsl:template>
 
   <!-- Merge continued elements -->
@@ -909,7 +959,7 @@
       </xsl:element>
     </xsl:if>
   </xsl:template>
-  
-  
+
+
 
 </xsl:stylesheet>
